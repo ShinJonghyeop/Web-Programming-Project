@@ -46,7 +46,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull ghcr.io/${{ github.repository }}:latest
+            docker login ghcr.io -u shinjonghyeop -p ${{ secrets.CR_PAT }}
+            docker pull ghcr.io/shinjonghyeop/web-programming-project:latest
             docker stop my-nginx || true
             docker rm my-nginx || true
-            docker run -d --name my-nginx -p 80:80 ghcr.io/${{ github.repository }}:latest
+            docker run -d --name my-nginx -p 80:80 ghcr.io/shinjonghyeop/web-programming-project:latest
