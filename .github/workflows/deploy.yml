@@ -26,15 +26,17 @@ jobs:
 
       - name: Build Docker image
         run: |
+          IMAGE_NAME=$(echo "ghcr.io/${{ github.repository }}:latest" | tr '[:upper:]' '[:lower:]')
           cd proxy
-          docker build -t ghcr.io/${{ github.repository }}:latest .
+          docker build -t $IMAGE_NAME .
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/${{ github.repository }}:latest
+          docker push $IMAGE_NAME
 
       # (선택) 서버에 SSH로 접속해 컨테이너 pull+재시작
       # - name: Deploy to server
