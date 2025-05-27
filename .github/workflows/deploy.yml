@@ -18,15 +18,15 @@ jobs:
 
       - name: Build frontend
         run: |
-          cd project/frontend
+          cd frontend
           npm ci
           npm run build
-          cd ../..
-          cp -r project/frontend/dist project/proxy/
+          cd ..
+          cp -r frontend/dist proxy/
 
       - name: Build Docker image
         run: |
-          cd project/proxy
+          cd proxy
           docker build -t ghcr.io/${{ github.repository }}:latest .
 
       - name: Login to GHCR
