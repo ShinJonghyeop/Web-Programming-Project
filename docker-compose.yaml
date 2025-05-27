@@ -1,0 +1,7 @@
+services:
+  webpage:
+    build:
+      context: ./proxy
+    ports:
+      - "8080:80"
+
