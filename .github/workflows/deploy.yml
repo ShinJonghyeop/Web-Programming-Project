@@ -1,0 +1,50 @@
+name: Deploy Frontend+Proxy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Build frontend
+        run: |
+          cd project/frontend
+          npm ci
+          npm run build
+          cd ../..
+          cp -r project/frontend/dist project/proxy/
+
+      - name: Build Docker image
+        run: |
+          cd project/proxy
+          docker build -t ghcr.io/${{ github.repository }}:latest .
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository }}:latest
+
+      # (선택) 서버에 SSH로 접속해 컨테이너 pull+재시작
+      # - name: Deploy to server
+      #   uses: appleboy/ssh-action@v0.1.10
+      #   with:
+      #     host: ${{ secrets.SERVER_HOST }}
+      #     username: ${{ secrets.SERVER_USER }}
+      #     key: ${{ secrets.SERVER_SSH_KEY }}
+      #     script: |
+      #       docker pull ghcr.io/${{ github.repository }}:latest
+      #       docker stop my-nginx || true
+      #       docker rm my-nginx || true
+      #       docker run -d --name my-nginx -p 80:80 ghcr.io/${{ github.repository }}:latest
